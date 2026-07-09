@@ -2,7 +2,7 @@ const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
 
 const ASPECT_RATIO = window.innerWidth / window.innerHeight;
-const RES = 150;
+const RES = 200;
 
 const WIDTH = Math.floor(RES * ASPECT_RATIO);
 const HEIGHT = Math.floor(RES);
@@ -20,13 +20,18 @@ const FRAMETIME = 1000 / FPS;
 
 /************** IMAGE_DATA ******************/
 
+// ctx.createImageData() using Uint32Array() buffer
 const rola = ctx.createImageData(WIDTH, HEIGHT);
-const rola_data = rola.data;
+const rola_buffer32 = new Uint32Array(rola.data.buffer);
 
-for(let i = 0; i < rola_data.length; i++)
-{
-  rola_data[i] = 255; // set alpha to 100%
-};
+// ctx.createImageData() using Uint8Array() buffer
+// const rola = ctx.createImageData(WIDTH, HEIGHT);
+// const rola_data = rola.data;
+
+// for(let i = 0; i < rola_data.length; i++)
+// {
+//   rola_data[i] = 255; // set alpha to 100%
+// };
 
 /************** MAIN LOOP *******************/
 
@@ -74,17 +79,21 @@ function animate(current_time)
           vy = vy + Math.cos(vx * i + i + time) / i + BOND;
         };
 
-        let gamma = 6 * exponent;
+        const gamma = 6 * exponent;
+
+        r = Math.tanh(gamma / r) * 255;
+        g = Math.tanh(gamma / g) * 255;
+        b = Math.tanh(gamma / b) * 255;
         
-        r = Math.tanh(gamma / r);
-        g = Math.tanh(gamma / g);
-        b = Math.tanh(gamma / b);
+        // First optimization try
+        // let i = 4 * (x + y * WIDTH);
+        // rola_data[i]     = r; // red
+        // rola_data[i + 1] = g; // green
+        // rola_data[i + 2] = b; // blue
 
-        let i = 4 * (x + y * WIDTH);
-
-        rola_data[i]     = r * 255; // red
-        rola_data[i + 1] = g * 255; // green
-        rola_data[i + 2] = b * 255; // blue
+        // Second optimization try
+        const hex_color = (255 << 24) | (b << 16) | (g << 8) | r;
+        rola_buffer32[x + y * WIDTH] = hex_color;
       };
     };
     ctx.putImageData(rola, 0, 0);
