@@ -35,16 +35,16 @@ const rola_buffer32 = new Uint32Array(rola.data.buffer);
 
 /************** MAIN LOOP *******************/
 
-let old_time = 0;
+// let old_time = 0;
 function animate(current_time)
 {
   window.requestAnimationFrame(animate);
   
-  let dt = current_time - old_time;
+  // let dt = current_time - old_time;
 
-  if(dt >= FRAMETIME)
+  // if(dt >= FRAMETIME)
   {
-    old_time = current_time - (current_time % FRAMETIME);
+    // old_time = current_time - (current_time % FRAMETIME);
     // console.log(dt);
 
     const time = current_time * PI_FRAMES;
@@ -92,7 +92,7 @@ function animate(current_time)
         // rola_data[i + 2] = b; // blue
 
         // Second optimization try
-        const hex_color = (255 << 24) | (b << 16) | (g << 8) | r;
+        const hex_color = ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
         rola_buffer32[x + y * WIDTH] = hex_color;
       };
     };
